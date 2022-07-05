@@ -1,16 +1,27 @@
 const express = require('express');
 const mongoose = require('mongoose');
+var createError = require('http-errors');
+var path = require('path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 require('dotenv').config();
 
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
-var crypto = require('crypto');
+const crypto = require('crypto');
 
-var app = express();
+const User = require('./models/user');
+
+const indexRouter = require('./routes/index');
+// const loginRouter = require('./routes/login')
+
+const app = express();
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 mongoose.connect(process.env.MONGO_DB_URI, {
   useUnifiedTopology: true,
@@ -20,18 +31,12 @@ mongoose.connect(process.env.MONGO_DB_URI, {
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'mongo connection error'));
 
-const UserSchema = new mongoose.Schema({
-  username: String,
-  hash: String,
-  salt: String,
-});
-
-const User = mongoose.model('User', UserSchema);
-
 const sessionStore = new MongoStore({
   mongoUrl: process.env.MONGO_DB_URI,
   collectionName: 'sessions',
 });
+
+// app.use('/login', loginRouter)
 
 app.use(
   session({
@@ -97,18 +102,7 @@ passport.deserializeUser((id, cb) => {
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('/', (req, res, next) => {
-  res.send('<h1>Home</h1><a href="/login">login</a>');
-});
-
-app.get('/login', (req, res, next) => {
-  const form =
-    '<h1>Login Page</h1><form method="POST" action="/login">\
-  Enter Username:<br><input type="text" name="username">\
-  <br>Enter Password:<br><input type="password" name="password">\
-  <br><br><input type="submit" value="Submit"></form>';
-  res.send(form);
-});
+app.use('/', indexRouter);
 
 app.post(
   '/login',
