@@ -10,6 +10,8 @@ router.get('/login', userController.login_get);
 
 router.post('/login', userController.login_post);
 
+router.get('/login-failure', userController.login_failure);
+
 router.get('/register', userController.register_get);
 
 router.post('/register', userController.register_post);

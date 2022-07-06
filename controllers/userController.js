@@ -11,6 +11,14 @@ exports.login_post = passport.authenticate('local', {
   successRedirect: '/protected-content',
 });
 
+exports.login_failure = (req, res, next) => {
+  res.render('user-form', {
+    title: 'Log In',
+    action: '/login',
+    error: 'Incorrect Password',
+  });
+};
+
 exports.register_get = (req, res, next) => {
   res.render('user-form', { title: 'Register', action: '/register' });
 };

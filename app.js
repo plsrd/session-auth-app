@@ -101,8 +101,4 @@ app.get('/login-success', (req, res, next) => {
   res.send('You successfully logged in.');
 });
 
-app.get('/login-failure', (req, res, next) => {
-  res.send('You entered the wrong password.');
-});
-
 app.listen(3000);
