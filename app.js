@@ -9,6 +9,7 @@ require('dotenv').config();
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const crypto = require('crypto');
+const validPassword = require('./lib/passwordUtils').validPassword;
 
 const User = require('./models/user');
 
@@ -50,26 +51,6 @@ app.use(
   })
 );
 
-const validPassword = (password, hash, salt) => {
-  const hashVerify = crypto
-    .pbkdf2Sync(password, salt, 10000, 64, 'sha512')
-    .toString('hex');
-  console.log(hash, hashVerify);
-  return hash === hashVerify;
-};
-
-const genPassword = password => {
-  const salt = crypto.randomBytes(32).toString('hex');
-  const genHash = crypto
-    .pbkdf2Sync(password, salt, 10000, 64, 'sha512')
-    .toString('hex');
-
-  return {
-    salt,
-    hash: genHash,
-  };
-};
-
 passport.use(
   new LocalStrategy((username, password, cb) => {
     User.findOne({ username })
@@ -101,54 +82,12 @@ passport.deserializeUser((id, cb) => {
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use((req, res, next) => {
+  res.locals.currentUser = req.user;
+  next();
+});
 
 app.use('/', indexRouter);
-
-app.post(
-  '/login',
-  passport.authenticate('local', {
-    failureRedirect: '/login-failure',
-    successRedirect: '/login-success',
-  }),
-  (req, res, next) => {
-    if (err) return next(err);
-  }
-);
-// When you visit http://localhost:3000/register, you will see "Register Page"
-app.get('/register', (req, res, next) => {
-  const form =
-    '<h1>Register Page</h1><form method="post" action="register">\
-                  Enter Username:<br><input type="text" name="username">\
-                  <br>Enter Password:<br><input type="password" name="password">\
-                  <br><br><input type="submit" value="Submit"></form>';
-  res.send(form);
-});
-
-app.post('/register', (req, res, next) => {
-  const saltHash = genPassword(req.body.password);
-
-  const { salt, hash } = saltHash;
-
-  new User({
-    username: req.body.username,
-    salt,
-    hash,
-  }).save((err, user) => {
-    if (err) return next(err);
-    console.log('New user', user);
-    res.redirect('/login');
-  });
-});
-
-app.get('/protected-route', (req, res, next) => {
-  console.log(req.session);
-
-  if (req.isAuthenticated()) {
-    res.send('<h1>You are authenticated</h1>');
-  } else {
-    res.send('<h1>You are not authenticated</h1>');
-  }
-});
 
 app.get('/logout', (req, res, next) => {
   req.logout(err => {
