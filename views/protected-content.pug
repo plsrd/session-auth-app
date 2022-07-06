@@ -2,4 +2,5 @@ extends layout
 
 block content 
   h2 Welcome #{currentUser.username}
-  
+  form(method='GET' action='/logout')
+    button(type='submit') Logout

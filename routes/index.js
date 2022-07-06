@@ -16,4 +16,6 @@ router.post('/register', userController.register_post);
 
 router.get('/protected-content', userController.protected_content_get);
 
+router.get('/logout', userController.logout_get);
+
 module.exports = router;
