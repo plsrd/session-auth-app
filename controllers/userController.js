@@ -15,7 +15,7 @@ exports.login_failure = (req, res, next) => {
   res.render('user-form', {
     title: 'Log In',
     action: '/login',
-    error: 'Incorrect Password',
+    error: 'Incorrect login',
   });
 };
 

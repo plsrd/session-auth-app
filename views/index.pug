@@ -1,6 +1,11 @@
 extends layout 
 
 block content 
-  a(href='/login') Log In
-  br
-  a(href='/register') Register 
+  if currentUser 
+    h2 Welcome #{currentUser.username}
+    form(method='GET' action='/logout')
+      button(type='submit') Logout
+  else
+    a(href='/login') Log In
+    br
+    a(href='/register') Register 

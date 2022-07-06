@@ -1,12 +1,12 @@
 extends layout 
 
 block content 
+  if error 
+    p= error
   form(method="POST" action=action)
     label Enter Username:
     input(type="text" name="username") 
     br
     label Enter Password:
-    if error 
-      p= error
     input(type="password" name="password")
     input(type="submit" value="Submit")
